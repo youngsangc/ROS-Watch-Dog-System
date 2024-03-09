@@ -1,21 +1,24 @@
 #include <ros/ros.h>
 #include <std_msgs/Int32.h>
 
+ros::Publisher pub;
+
+void intCallback(const std_msgs::Int32::ConstPtr& msg) {
+    if (msg->data == 1) {
+        std_msgs::Int32 response_msg;
+        response_msg.data = 2;
+        pub.publish(response_msg);
+    }
+}
+
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "int_publisher");
+    ros::init(argc, argv, "int_subscriber_and_publisher");
     ros::NodeHandle nh;
 
-    ros::Publisher pub = nh.advertise<std_msgs::Int32>("int_topic_1", 1000);
-    ros::Rate loop_rate(10); // 0.1초 간격
+    pub = nh.advertise<std_msgs::Int32>("int_topic_2", 1000);
+    ros::Subscriber sub = nh.subscribe("int_topic_1", 1000, intCallback);
 
-    while (ros::ok()) {
-        std_msgs::Int32 msg;
-        msg.data = 1;
-
-        pub.publish(msg);
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
+    ros::spin();
 
     return 0;
 }
